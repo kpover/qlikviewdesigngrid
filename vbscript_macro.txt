@@ -1,0 +1,91 @@
+Dim vTotalNumColumns
+Dim vTotalNumRows
+Dim vColumnWidth
+Dim vRowHeight
+Dim vColumnWhiteSpace
+Dim vRowWhiteSpace
+Dim vLeftMargin
+Dim vTopMargin
+Dim vTotalWidth
+Dim vTotalHeight
+Dim vColumnX
+Dim vColumnY
+Dim vColumnNum
+Dim vRowNum
+
+sub CreateDesignGrid
+
+	vTotalNumColumns = CInt(ActiveDocument.GetVariable("vTotalNumColumns").GetContent.String)
+	vTotalNumRows = CInt(ActiveDocument.GetVariable("vTotalNumRows").GetContent.String)
+	vColumnWidth = CInt(ActiveDocument.GetVariable("vColumnWidth").GetContent.String)
+	vRowHeight = CInt(ActiveDocument.GetVariable("vRowHeight").GetContent.String)
+	vColumnWhiteSpace = CInt(ActiveDocument.GetVariable("vColumnWhiteSpace").GetContent.String)
+	vRowWhiteSpace = CInt(ActiveDocument.GetVariable("vRowWhiteSpace").GetContent.String)
+	vLeftMargin = CInt(ActiveDocument.GetVariable("vLeftMargin").GetContent.String)
+	vTopMargin = CInt(ActiveDocument.GetVariable("vTopMargin").GetContent.String)
+	
+	vTotalWidth = 2*vLeftMargin + (vColumnWidth)*vTotalNumColumns  + (vColumnWhiteSpace*(vTotalNumColumns-1))
+	vTotalHeight = 2*vTopMargin + (vRowHeight)*vTotalNumRows + (vRowWhiteSpace*(vTotalNumRows-1))
+		
+	for vColumnNum = 0 to vTotalNumColumns-1
+		if vColumnNum = 0 then
+			Call CreateColumn(vColumnNum,vLeftMargin,vColumnWidth,vTotalHeight)
+		Else
+			vColumnX = vLeftMargin + vColumnNum*(vColumnWidth+vColumnWhiteSpace)
+			Call CreateColumn(vColumnNum,vColumnX,vColumnWidth,vTotalHeight)
+		end if
+	Next 
+	
+	for vRowNum = 0 to vTotalNumRows-1
+		if vRowNum = 0 then
+			Call CreateRow(vRowNum,vTopMargin,vRowHeight,vTotalWidth)
+		Else
+			vRowY = vTopMargin + vRowNum*(vRowHeight+vRowWhiteSpace)
+			Call CreateRow(vRowNum,vRowY,vRowHeight,vTotalWidth)
+		end if
+	Next 
+
+end sub
+
+Function CreateColumn (vColumnNum,vColumnX,vColumnWidth,vTotalHeight)
+
+	set GridColumn = ActiveDocument.ActiveSheet.CreateTextObject
+	set GridColumnRect = GridColumn.GetRect
+	GridColumnRect.Width = vColumnWidth
+	GridColumnRect.Height = vTotalHeight
+	GridColumnRect.Top = 0
+	GridColumnRect.Left = vColumnX
+	GridColumn.SetRect GridColumnRect
+	
+	GridColumnProp = GridColumn.GetProperties
+	GridColumnProp.Layout.Frame.ObjectId = "Grid_Cols" 'Not working in QlikView 12
+	GridColumnProp.Layout.BkgColor.PrimaryCol.Col = RGB(255,0,0)
+	GridColumnProp.Layout.BkgAlpha = 15
+	GridColumnProp.Layout.Frame.AllowMoveSize = false
+	GridColumn.SetProperties GridColumnProp
+	
+	GridColumn.SetLayer -2
+
+end function
+
+Function CreateRow (vRowNum,vRowY,vRowHeight,vTotalWidth)
+
+	set GridRow = ActiveDocument.ActiveSheet.CreateTextObject
+	set GridRowRect = GridRow.GetRect
+	GridRowRect.Width = vTotalWidth
+	GridRowRect.Height = vRowHeight
+	GridRowRect.Top = vRowY
+	GridRowRect.Left = 0
+	GridRow.SetRect GridRowRect
+	
+	GridRowProp = GridRow.GetProperties
+	GridRowProp.Layout.Frame.ObjectId = "Grid_Rows" 'Not working in QlikView 12
+	GridRowProp.Layout.BkgColor.PrimaryCol.Col = RGB(255,0,0)
+	GridRowProp.Layout.BkgAlpha = 15
+	GridRowProp.Layout.Frame.AllowMoveSize = false
+	GridRow.SetProperties GridRowProp
+	
+	GridRow.SetLayer -2
+
+end function
+
